@@ -1,0 +1,13 @@
+[build]
+builder = "nixpacks"
+buildCommand = "echo 'Building both frontend and backend...'"
+
+[deploy]
+startCommand = "echo 'Starting services...'"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "on-failure"
+
+[deploy.services]
+frontend = "cd frontend && npm start"
+backend = "cd backend && gunicorn app:create_app()" 
