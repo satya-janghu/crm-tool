@@ -4,37 +4,31 @@ from email.mime.text import MIMEText
 import base64
 import os
 from ..models.settings import Settings, SettingsKeys
-import json
 
 SCOPES = ['https://mail.google.com/']
 SERVICE_ACCOUNT_FILE = 'credentials.json'
 
 def create_gmail_service():
-    """Create and return a Gmail service object using credentials from environment variables."""
+    """Create Gmail service using the global email account"""
     try:
-        # Get credentials JSON from environment variable
-        credentials_json = os.environ.get('GMAIL_CREDENTIALS')
-        if not credentials_json:
-            raise ValueError("GMAIL_CREDENTIALS environment variable not set")
+        # Get global email from settings
+        global_email = Settings.query.filter_by(key=SettingsKeys.GLOBAL_EMAIL).first()
+        if not global_email or not global_email.value:
+            raise Exception("Global email not configured")
 
-        # Parse credentials JSON
-        credentials_info = json.loads(credentials_json)
-
-        # Create credentials object
-        credentials = service_account.Credentials.from_service_account_info(
-            credentials_info,
-            scopes=['https://mail.google.com/']
+        credentials = service_account.Credentials.from_service_account_file(
+            SERVICE_ACCOUNT_FILE,
+            scopes=SCOPES
         )
-
-        # Create delegated credentials with user email
-        delegated_credentials = credentials.with_subject(os.environ.get('GMAIL_DELEGATE_USER'))
-
-        # Build and return the service
+        
+        # Create delegated credentials for the global email
+        delegated_credentials = credentials.with_subject(global_email.value)
+        
+        # Build the Gmail service
         service = build('gmail', 'v1', credentials=delegated_credentials)
         return service
     except Exception as e:
-        print(f"Error creating Gmail service: {str(e)}")
-        raise
+        raise Exception(f"Failed to create Gmail service: {str(e)}")
 
 def send_email(service, to, subject, body):
     """Send an email using the Gmail API with global email settings"""
