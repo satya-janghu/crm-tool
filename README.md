@@ -39,9 +39,7 @@ Conversion rate (positive replies to meetings)
 Follow-up success rate
 Team Performance: Show metrics for individual team members.
 Export Data: Export leads and reports as CSV files.
-8. Cold Outreach Templates
-Email Templates: Save and reuse email templates for outreach.
-Personalization Fields: Include dynamic fields (e.g., Name, Company) to personalize emails.
+
 9. Notifications System
 Email Reminders: Notify users for follow-ups, meetings, or tasks.
 In-App Alerts: Show notifications for important activities within the app.

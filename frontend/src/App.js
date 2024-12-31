@@ -13,6 +13,7 @@ import LeadForm from './components/leads/LeadForm';
 import LeadEmail from './components/leads/LeadEmail';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import Settings from './components/settings/Settings';
 
 const theme = createTheme({
     palette: {
@@ -107,6 +108,14 @@ function App() {
                             }
                         />
                     </Route>
+                    <Route
+                        path="/settings"
+                        element={
+                            <ProtectedRoute requireAdmin>
+                                <Settings />
+                            </ProtectedRoute>
+                        }
+                    />
                 </Routes>
             </Router>
         </ThemeProvider>

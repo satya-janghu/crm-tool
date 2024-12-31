@@ -3,39 +3,27 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from datetime import timedelta
-import os
-from dotenv import load_dotenv
-from .utils.error_handlers import init_error_handlers, APIError, handle_api_error
-
-load_dotenv()
+from config import Config
 
 db = SQLAlchemy()
+migrate = Migrate()
 jwt = JWTManager()
 
-def create_app():
+def create_app(config_class=Config):
     app = Flask(__name__)
-    
-    # Configuration
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///crm.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'your-secret-key')  # Change in production
-    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
-    
+    app.config.from_object(config_class)
+
     # Initialize extensions
-    CORS(app)
     db.init_app(app)
+    migrate.init_app(app, db)
     jwt.init_app(app)
-    Migrate(app, db)
-    
-    # Initialize error handlers
-    init_error_handlers(app)
-    app.register_error_handler(APIError, handle_api_error)
-    
+    CORS(app)
+
     # Register blueprints
-    from .routes import auth, leads, users
+    from .routes import auth, leads, notifications, settings
     app.register_blueprint(auth.bp)
     app.register_blueprint(leads.bp)
-    app.register_blueprint(users.bp)
-    
+    app.register_blueprint(notifications.bp)
+    app.register_blueprint(settings.bp)
+
     return app 

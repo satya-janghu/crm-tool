@@ -7,6 +7,7 @@ from ..models.user import User
 from .. import db
 from ..utils.gmail_service import create_gmail_service, send_email
 from ..utils.error_handlers import APIError
+from ..models.notification import Notification, NotificationType
 
 bp = Blueprint('leads', __name__, url_prefix='/api/leads')
 
@@ -93,20 +94,27 @@ def update_lead(lead_id):
 
     data = request.get_json()
     
-    if 'name' in data:
-        lead.name = data['name']
-    if 'email' in data:
-        lead.email = data['email']
-    if 'company_name' in data:
-        lead.company_name = data['company_name']
-    if 'industry' in data:
-        lead.industry = data['industry']
-    if 'status' in data:
-        lead.status = data['status']
-    if 'assigned_to' in data and current_user.role == 'admin':
-        lead.assigned_to = data['assigned_to']
-    if 'next_follow_up' in data:
-        lead.next_follow_up = datetime.fromisoformat(data['next_follow_up'])
+    # Update lead fields
+    for field in ['name', 'email', 'company_name', 'industry', 'status']:
+        if field in data:
+            setattr(lead, field, data[field])
+    
+    # Handle follow-up scheduling
+    if 'next_follow_up' in data and data['next_follow_up']:
+        new_follow_up = datetime.fromisoformat(data['next_follow_up'])
+        if lead.next_follow_up != new_follow_up:
+            lead.next_follow_up = new_follow_up
+            
+            # Create notification for the follow-up
+            notification = Notification(
+                user_id=lead.assigned_to,
+                lead_id=lead.id,
+                type=NotificationType.FOLLOW_UP,
+                title=f'Follow-up scheduled with {lead.name}',
+                message=f'You have scheduled a follow-up with {lead.name} from {lead.company_name}.',
+                scheduled_for=new_follow_up
+            )
+            db.session.add(notification)
 
     db.session.commit()
     return jsonify({'message': 'Lead updated successfully', 'lead': lead.to_dict()})
@@ -208,13 +216,12 @@ def send_lead_email(lead_id):
         return jsonify({'error': 'Missing required fields'}), 400
 
     try:
-        # Create Gmail service for the current user
-        service = create_gmail_service(current_user.email)
+        # Create Gmail service using global email
+        service = create_gmail_service()
         
         # Send email
         sent_message = send_email(
             service=service,
-            sender=current_user.email,
             to=lead.email,
             subject=data['subject'],
             body=data['content']
@@ -233,8 +240,22 @@ def send_lead_email(lead_id):
 
         # Update lead's last contact date
         lead.last_contact_date = datetime.utcnow()
+        
+        # Handle follow-up scheduling
         if data.get('scheduled_follow_up'):
-            lead.next_follow_up = datetime.fromisoformat(data['scheduled_follow_up'])
+            follow_up_date = datetime.fromisoformat(data['scheduled_follow_up'])
+            lead.next_follow_up = follow_up_date
+            
+            # Create notification for the follow-up
+            notification = Notification(
+                user_id=current_user.id,
+                lead_id=lead.id,
+                type=NotificationType.FOLLOW_UP,
+                title=f'Follow-up scheduled with {lead.name}',
+                message=f'You have scheduled a follow-up after sending an email to {lead.name} from {lead.company_name}.',
+                scheduled_for=follow_up_date
+            )
+            db.session.add(notification)
 
         db.session.add(email_log)
         db.session.commit()
