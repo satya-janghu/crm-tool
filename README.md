@@ -4,7 +4,7 @@ Key Features
 1. User Management
 Admin Dashboard: Manage users, set roles (Admin, Team Member).
 Team Access: Allow multiple team members to log in and work collaboratively.
-Authentication: Secure login system with role-based access control.
+Authentication: Setup admin account with satya@pixeljab.com as the email and V33rT3jaji! as the password. Admin can add other users and set their roles.
 2. Lead Management
 Lead Database: Store leads with fields like:
 Name
@@ -25,15 +25,9 @@ Decline
 4. Follow-up Management
 Automated Reminders: Notify team members to follow up based on response type or a predefined schedule.
 Follow-up Scheduling:
-Calendar integration (Google Calendar or built-in)
-Email notifications/reminders
-5. Meeting Scheduling
-Scheduler Integration:
-Integrate with Calendly or similar tools.
-Provide a "Schedule Meeting" button that sends a link.
-Manual Scheduling:
-Allow users to log and set meetings in the tool with time, date, and duration.
-Automatic reminders for upcoming meetings.
+Send email to the lead with a link to the meeting directly from the CRM tool. Provide a "Insert Calendly" button that inserts the link into the email body.
+
+
 6. Notes and Activity Log
 Notes Section: Add notes for each lead (e.g., call highlights, objections, next steps).
 Activity Log: Track all interactions with leads, including emails sent, replies received, and meetings scheduled.
@@ -55,7 +49,7 @@ Technical Requirements
 Frontend
 Built with React.js for a responsive, modern UI.
 Backend
-Backend logic using a lightweight framework compatible with SQLite (e.g., Flask, FastAPI, or Node.js with Express).
+Backend logic using Flask with SQLite
 REST API for frontend-backend communication.
 Database
 SQLite for:
@@ -65,9 +59,3 @@ Email tracking
 Notes and reminders
 Cloud Hosting
 Hosted on a cloud platform (e.g., AWS, GCP, or Heroku) for accessibility.
-Security
-Implement HTTPS for secure communication.
-Data encryption for sensitive information (e.g., email addresses).
-Role-based access control for users.
-Scalability
-Provide a migration path for the database (e.g., SQLite to PostgreSQL) in case of growth.
