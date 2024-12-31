@@ -4,6 +4,23 @@
 - Railway CLI installed (`npm install -g @railway/cli`)
 - Railway account
 - Git repository initialized
+- Gmail API Service Account credentials
+
+## Gmail API Setup
+
+1. Convert your `credentials.json` to a single line:
+```bash
+cat credentials.json | jq -c '.' > credentials_oneline.json
+```
+
+2. Set Gmail credentials in Railway:
+```bash
+# Set the credentials JSON (replace with your one-line JSON content)
+railway variables set GMAIL_CREDENTIALS="$(cat credentials_oneline.json)"
+
+# Set the delegated user email
+railway variables set GMAIL_DELEGATE_USER="your-email@your-domain.com"
+```
 
 ## Initial Setup
 
